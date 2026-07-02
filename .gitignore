@@ -22,4 +22,8 @@ models/*.joblib
 # Jupyter
 .ipynb_checkpoints/
 
+# tutorials
+tuts/
 
+# test pcaps
+testpcaps/
