@@ -1,6 +1,6 @@
 import argparse
 from scapy.all import rdpcap
-
+from scapy.layers.inet import IP
 
 def load_pcap(file_path):
     """
@@ -9,23 +9,45 @@ def load_pcap(file_path):
     return rdpcap(file_path)
 
 
-def display_summary(packets):
+
+
+
+def extract_packet_info(packets):
     """
-    Displays basic information about the capture.
+    Extract basic information from every packet.
     """
 
+    packet_data = []
+
+    for index, packet in enumerate(packets, start=1):
+
+       # make a list of tuples for each packet 
+  
+        if IP in packet:
+
+            packet_data.append({
+                "Packet No": index,
+                "Source IP": packet[IP].src,
+                "Destination IP": packet[IP].dst,
+                "Protocol": packet.lastlayer().name,
+                "Length": len(packet)
+
+
+            })
+
+    return packet_data
+
+
+def display_summary(packet_data):
+
     print("=" * 60)
-    print("TLSProfiler - PCAP Parser")
+    print("TLSProfiler - Packet Summary")
     print("=" * 60)
 
-    print(f"Total Packets : {len(packets)}")
+    print(f"Total IP Packets: {len(packet_data)}\n")
 
-    print("\nFirst 5 Packet Summaries:\n")
-
-    for index, packet in enumerate(packets[:5], start=1):
-        print(f"{index}. {packet.summary()}")
-
-    print("=" * 60)
+    for packet in packet_data[:10]:
+        print(packet)
 
 
 def main():
@@ -47,7 +69,8 @@ def main():
 
         packets = load_pcap(args.pcap)
 
-        display_summary(packets)
+        packet_data = extract_packet_info(packets)
+        display_summary(packet_data)
 
     except FileNotFoundError:
         print(f"\nError: '{args.pcap}' not found.")
