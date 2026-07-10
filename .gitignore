@@ -9,7 +9,10 @@ venv/
 .vscode/
 
 # Packet captures
-*.pcap
+captures/*.pcap 
+!captures/reddit.pcap
+
+
 
 # Data
 data/*.csv
