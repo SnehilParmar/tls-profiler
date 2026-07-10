@@ -1,2 +1,8 @@
-pyshark
 scapy
+pyshark
+pandas
+numpy
+scikit-learn
+streamlit
+matplotlib
+
