@@ -1,23 +1,3 @@
-from scapy.all import rdpcap
-from scapy.layers.inet import IP, TCP, UDP
-
-
-packets = rdpcap("youtube.pcap")
-
-tcp_packets = 0
-udp_packets = 0
-
-for packet in packets:
-    if IP in packet:
-        if TCP in packet:
-            tcp_packets += 1
-        elif UDP in packet:
-            udp_packets += 1    
-
-print(f"TCP Packets: {tcp_packets}")
-print(f"UDP Packets: {udp_packets}")
-
-
 import hashlib
 import csv
 import json 
@@ -122,13 +102,13 @@ def get_features (pkt):
 
 if __name__ == "__main__":
 
-    packets = rdpcap("2026-02-28-traffic-analysis-exercise.pcap")
+    packets = rdpcap("testpcaps/2026-02-28-traffic-analysis-exercise.pcap")
     count = 0
 
     for pkt in packets:
         if pkt.haslayer(TLSClientHello):
             print(count, ": ", end = "")
-            print(pkt.summary(), "="*22)
+            print(pkt.summary(), "="*9)
             pprint(get_features(pkt))
         count+=1
 
