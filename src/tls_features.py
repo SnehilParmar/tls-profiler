@@ -114,6 +114,19 @@ def display_tls_info(df):
 
     print("=" * 70)
 
+def tls_statistics(df):
+    """
+    Display TLS statistics.
+    """
+
+    print("\n" + "=" * 60)
+    print("TLS Statistics")
+    print("=" * 60)
+
+    version_count = df["TLS Version"].value_counts()
+
+    print(version_count)
+
 
 def main():
 
@@ -142,6 +155,7 @@ def main():
         )
 
         display_tls_info(df)
+        tls_statistics(df)
 
         print("\nCSV saved to: output/tls_features.csv")
 
