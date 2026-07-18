@@ -1,7 +1,13 @@
 import argparse
 from scapy.all import rdpcap
-from scapy.layers.inet import IP
 import pandas as pd
+import os
+from scapy.layers.inet import IP
+from scapy.layers.tls.all import TLS
+from scapy.layers.tls.handshake import TLSClientHello
+from scapy.layers.tls.extensions import TLS_Ext_ServerName
+
+
 
 
 
@@ -11,8 +17,32 @@ def load_pcap(file_path):
     """
     return rdpcap(file_path)
 
+def save2csv (packet_data, csv_file):
+    os.makedirs(
+        os.path.dirname(csv_file),
+        exist_ok=True
+    )
 
+    df = pd.DataFrame(packet_data)
+    df.to_csv(csv_file, index=False)
+    return df
 
+def extractSNI (packet):
+    """
+    return sni host name if present
+    """
+    if TLSClientHello not in packet:
+        return None
+    client_hello  = packet[TLSClientHello] 
+
+    if not hasattr(client_hello, "ext"):
+        return None
+    
+    for extention in client_hello.ext:
+        if isinstance(extention, TLS_Ext_ServerName):
+            if extention.servernames:
+                return extention.servernames[0].servername.decode()
+    return None
 
 
 def extract_packet_info(packets):
@@ -45,22 +75,15 @@ def extract_packet_info(packets):
     return packet_data
 
 
-def display_packet_info(packet_data):
+def display_packet_info(df):
 
     print("=" * 60)
     print("TLSProfiler - Packet Summary")
     print("=" * 60)
 
-    print(f"Total IP Packets: {len(packet_data)}\n")
+    print(f"Total IP Packets: {len(df)}\n")
 
-    for packet in packet_data[:10]:
-        print(
-            f"{packet['Packet No']:>3} | "
-            f"{packet['Source IP']:<15} -> "
-            f"{packet['Destination IP']:<15} | "
-            f"{packet['Protocol']:<10} | "
-            f"{packet['Length']} bytes"
-        )
+    print(df.head(10).to_string(index=False))
 
 
 def main():
@@ -83,7 +106,8 @@ def main():
         packets = load_pcap(args.pcap)
 
         packet_data = extract_packet_info(packets)
-        display_packet_info(packet_data)
+        df = save2csv(packet_data, "output/packet_info.csv")
+        display_packet_info(df)
 
     except FileNotFoundError:
         print(f"\nError: '{args.pcap}' not found.")
